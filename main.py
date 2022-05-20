@@ -2,15 +2,15 @@ ServoMotorNum = 4
 
 class SuperServos():
     def __init__(self, nums, delta) -> None:
+        self.ServoNum = nums
+        self.delta = delta
         self.ServoAngles = []
         self.ServoExperResultsP = []
         self.ServoExperResultsN = []
         for i in range(nums):
-            self.ServoAngles.append(45.0)
             self.ServoExperResultsP.append(0.0)
             self.ServoExperResultsN.append(0.0)
-        self.ServoNum = nums
-        self.delta = delta
+            self.ServoAngles.append(45.0)
     
     def Move(self, id, action):
         if self.ServoAngles[id] + action > 0 and self.ServoAngles[id] + action < 180:
@@ -44,3 +44,19 @@ class SuperServos():
                 statusAfter = self.Measure()
                 self.ServoExperResultsN[id] = self.ComputeEffect(statusBefore, statusAfter)
                 self.Move(id, self.delta)
+    
+    def FindBestOperation(self):
+        BestIdxP = 0
+        BestIdxN = 0
+        for i in self.ServoExperResultsP:
+            if(self.ServoExperResultsP[i] < self.ServoExperResultsP[BestIdxP]):
+                BestIdxP = i
+        for j in self.ServoExperResultsN:
+            if(self.ServoExperResultsN[j] < self.ServoExperResultsP[BestIdxN]):
+                BestIdxN = j
+        if self.ServoExperResultsP[BestIdxP] < self.ServoExperResultsN[BestIdxN]:
+            return 'P', BestIdxP
+        else:
+            return 'N', BestIdxN
+        
+
