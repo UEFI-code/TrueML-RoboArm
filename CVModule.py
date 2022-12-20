@@ -22,16 +22,24 @@ class myCV():
             return False, None
 
         # Detect QR code in image A
-        dataA, bboxA, straight_qrcodeA = self.detector.detectAndDecode(frameA)
+        ret, dataA, bboxA, straight_qrcodeA = self.detector.detectAndDecodeMulti(frameA)
         if bboxA is None:
             return False, None
         qrID_A = 0
-
+        for i in range(len(dataA)):
+            if dataA[i] == self.magicWordA:
+                qrID_A = i
+                break
+            
         # Detect QR code in image B
-        dataB, bboxB, straight_qrcodeB = self.detector.detectAndDecode(frameB)
+        ret, dataB, bboxB, straight_qrcodeB = self.detector.detectAndDecodeMulti(frameB)
         if bboxB is None:
             return False, None
         qrID_B = 0
+        for i in range(len(dataB)):
+            if dataB[i] == self.magicWordB:
+                qrID_B = i
+                break
 
         # Calculate 3D position and return
         centerPosA = [(bboxA[qrID_A][0][0] + bboxA[qrID_A][2][0]) / 2, (bboxA[qrID_A][0][1] + bboxA[qrID_A][2][1]) / 2]
