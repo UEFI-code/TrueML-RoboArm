@@ -10,6 +10,8 @@ import Cerebellum
 
 Motors = 6
 MotorMaxTrys = 10
+BatchSize = 16
+Epochs = 1000
 
 theServoDrv = ServoDrv.ServoDrv(Motors)
 theCVModule = CVModule.myCV(0, 1, "NiceTryA", "NiceTryB")
@@ -84,3 +86,26 @@ def trainDecider(batchSize, motors, servoObj, cvObj, decider, optimizer, lossFun
         optimizer.step()
         # print info
         print("The Decider train Epoch: " + str(epoch) + " | Loss: " + str(loss.item()))
+
+def teachDecider(batchSize, predictor, decider, optimizerDecider, lossFunc, epochs):
+    for epoch in range(epochs):
+        # generate dummy targets
+        print("Generating dummy targets...")
+        targets = torch.rand(batchSize, 3)
+        optimizerDecider.zero_grad()
+        kasoX = decider(targets)
+        kasoY = predictor(kasoX)
+        # We belive predictor more strongly than decider
+        loss = lossFunc(kasoY, targets)
+        loss.backward()
+        optimizerDecider.step()
+
+trainPredictor(BatchSize, Motors, theServoDrv, theCVModule, thePredictor, optimPredictor, lossFunc, Epochs)
+torch.save(thePredictor.state_dict(), "thePredictor.pth")
+trainDecider(BatchSize, Motors, theServoDrv, theCVModule, theDecider, optimDecider, lossFunc, Epochs)
+torch.save(theDecider.state_dict(), "theDecider.pth")
+teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs)
+torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
+
+
+        
