@@ -99,6 +99,8 @@ def teachDecider(batchSize, predictor, decider, optimizerDecider, lossFunc, epoc
         loss = lossFunc(kasoY, targets)
         loss.backward()
         optimizerDecider.step()
+        # print info
+        print("The Decider teach Epoch: " + str(epoch) + " | Loss: " + str(loss.item()))
 
 trainPredictor(BatchSize, Motors, theServoDrv, theCVModule, thePredictor, optimPredictor, lossFunc, Epochs)
 torch.save(thePredictor.state_dict(), "thePredictor.pth")
@@ -106,6 +108,3 @@ trainDecider(BatchSize, Motors, theServoDrv, theCVModule, theDecider, optimDecid
 torch.save(theDecider.state_dict(), "theDecider.pth")
 teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs)
 torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
-
-
-        
