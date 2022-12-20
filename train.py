@@ -29,7 +29,6 @@ lossFunc = nn.MSELoss()
 def getMiniBatch(batchSize, motors, servoObj, cvObj):
     outputX = []
     outputY = []
-
     motorData = [0.0] * motors
     for _ in range(batchSize):
         # generate suitable motor data
@@ -39,7 +38,7 @@ def getMiniBatch(batchSize, motors, servoObj, cvObj):
             for i in range(motors):
                 motorData[i] = random.random()
             # try to set motor data
-            if servoObj.setServoGroup(motorData):
+            if servoObj.setServoGroupRatio(motorData):
                 print('Great! Motor data is suitable.')
                 break
             # check if it is the last try
@@ -56,3 +55,32 @@ def getMiniBatch(batchSize, motors, servoObj, cvObj):
         outputY.append(realPos)
     return torch.tensor(outputX, dtype=torch.float), torch.tensor(outputY, dtype=torch.float)
     
+def trainPredictor(batchSize, motors, servoObj, cvObj, predictor, optimizer, lossFunc, epochs):
+    for epoch in range(epochs):
+        # get data
+        print("Getting data...")
+        x, y = getMiniBatch(batchSize, motors, servoObj, cvObj)
+        # train
+        print("Training...thePredictor")
+        optimizer.zero_grad()
+        output = predictor(x)
+        loss = lossFunc(output, y)
+        loss.backward()
+        optimizer.step()
+        # print info
+        print("The Predictor train Epoch: " + str(epoch) + " | Loss: " + str(loss.item()))
+
+def trainDecider(batchSize, motors, servoObj, cvObj, decider, optimizer, lossFunc, epochs):
+    for epoch in range(epochs):
+        # get data
+        print("Getting data...")
+        x, y = getMiniBatch(batchSize, motors, servoObj, cvObj)
+        # train
+        print("Training...theDecider")
+        optimizer.zero_grad()
+        output = decider(y)
+        loss = lossFunc(output, x)
+        loss.backward()
+        optimizer.step()
+        # print info
+        print("The Decider train Epoch: " + str(epoch) + " | Loss: " + str(loss.item()))

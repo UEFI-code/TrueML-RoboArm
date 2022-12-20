@@ -6,6 +6,8 @@ class myCV():
     def __init__(self, deviceA, deviceB, magicWordA, magicWordB):
         self.capA = cv2.VideoCapture(deviceA)
         self.capB = cv2.VideoCapture(deviceB)
+        self.capWidth = int(self.capA.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.capHeight = int(self.capA.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.magicWordA = magicWordA
         self.magicWordB = magicWordB
         self.detector = cv2.QRCodeDetector()
@@ -30,7 +32,7 @@ class myCV():
             if dataA[i] == self.magicWordA:
                 qrID_A = i
                 break
-            
+
         # Detect QR code in image B
         ret, dataB, bboxB, straight_qrcodeB = self.detector.detectAndDecodeMulti(frameB)
         if bboxB is None:
@@ -44,4 +46,4 @@ class myCV():
         # Calculate 3D position and return
         centerPosA = [(bboxA[qrID_A][0][0] + bboxA[qrID_A][2][0]) / 2, (bboxA[qrID_A][0][1] + bboxA[qrID_A][2][1]) / 2]
         centerPosB = [(bboxB[qrID_B][0][0] + bboxB[qrID_B][2][0]) / 2, (bboxB[qrID_B][0][1] + bboxB[qrID_B][2][1]) / 2]
-        return True, [centerPosA[0], centerPosA[1], centerPosB[2]]
+        return True, [centerPosA[0] / self.capWidth, centerPosA[1] / self.capHeight, centerPosB[2] / self.capHeight]
