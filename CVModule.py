@@ -46,4 +46,4 @@ class myCV():
         # Calculate 3D position and return
         centerPosA = [(bboxA[qrID_A][0][0] + bboxA[qrID_A][2][0]) / 2, (bboxA[qrID_A][0][1] + bboxA[qrID_A][2][1]) / 2]
         centerPosB = [(bboxB[qrID_B][0][0] + bboxB[qrID_B][2][0]) / 2, (bboxB[qrID_B][0][1] + bboxB[qrID_B][2][1]) / 2]
-        return True, [centerPosA[0] / self.capWidth, centerPosA[1] / self.capHeight, centerPosB[2] / self.capHeight]
+        return True, [centerPosA[0] / self.capWidth, centerPosA[1] / self.capHeight, centerPosB[1] / self.capHeight]
