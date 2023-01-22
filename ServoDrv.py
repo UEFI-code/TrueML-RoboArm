@@ -4,6 +4,12 @@ class ServoDrv():
         self.servoAngles = [0.0] * servoNum
         # Initialize hardware
     
+    def hardwareSync(self, id, angle):
+        # Wait for hardware response
+        pwmValue = int(angle / 180.0 * 4095.0)
+
+        return True
+
     def setServoAngle(self, id, angle, time):
         if id < 0 or id >= self.servoNum:
             return False
@@ -11,14 +17,19 @@ class ServoDrv():
             return False
         if time <= 0:
             return False
-        # Wait for hardware response
-        self.servoAngles[id] = angle
-        return True
+        if self.hardwareSync(id, angle):
+            self.servoAngles[id] = angle
+            return True
+        else:
+            return False
 
     def setServoAngleInternal(self, id, angle, time):
         # Wait for hardware response
-        self.servoAngles[id] = angle
-        return True
+        if self.hardwareSync(id, angle):
+            self.servoAngles[id] = angle
+            return True
+        else:
+            return False
 
     def moveServoAngle(self, id, angle, time):
         if id < 0 or id >= self.servoNum:
@@ -29,13 +40,19 @@ class ServoDrv():
         if currentAngle + angle < 0.0 or currentAngle + angle > 180.0:
             return False
         # Wait for hardware response
-        self.servoAngles[id] += angle
-        return True
+        if self.hardwareSync(id, currentAngle + angle):
+            self.servoAngles[id] += angle
+            return True
+        else:
+            return False
 
     def moveServoAngleInternal(self, id, angle, time):
         # Wait for hardware response
-        self.servoAngles[id] += angle
-        return True
+        if self.hardwareSync(id, self.servoAngles[id] + angle):
+            self.servoAngles[id] += angle
+            return True
+        else:
+            return False
     
     def setServoGroupAngle(self, angleData, time):
         if len(angleData) != self.servoNum:
