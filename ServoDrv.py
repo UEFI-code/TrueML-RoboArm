@@ -11,7 +11,7 @@ class ServoDrv():
         self.arm_device.Arm_serial_servo_write(id, angle, time)
         return True
 
-    def setServoAngle(self, id, angle, time):
+    def setServoAngle(self, id, angle, time = 1024):
         if id < 0 or id >= self.servoNum:
             return False
         if angle < 0.0 or angle > 180.0:
@@ -55,7 +55,7 @@ class ServoDrv():
         else:
             return False
     
-    def setServoGroupAngle(self, angleData, time):
+    def setServoGroupAngle(self, angleData, time = 1024):
         if len(angleData) != self.servoNum:
             return False
         if time <= 0:
@@ -67,7 +67,7 @@ class ServoDrv():
             if not res:
                 return False
     
-    def setServoGroupRatio(self, ratioData, time):
+    def setServoGroupRatio(self, ratioData, time = 1024):
         if len(ratioData) != self.servoNum:
             return False
         if time <= 0:
