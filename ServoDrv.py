@@ -1,13 +1,14 @@
+from Arm_Lib import Arm_Device
 class ServoDrv():
     def __init__(self, servoNum):
         self.servoNum = servoNum
         self.servoAngles = [0.0] * servoNum
+        self.arm_device = Arm_Device()
         # Initialize hardware
     
-    def hardwareSync(self, id, angle):
+    def hardwareSync(self, id, angle, time):
         # Wait for hardware response
-        pwmValue = int(angle / 180.0 * 4095.0)
-
+        self.arm_device.Arm_serial_servo_write(id, angle, time)
         return True
 
     def setServoAngle(self, id, angle, time):
@@ -17,7 +18,7 @@ class ServoDrv():
             return False
         if time <= 0:
             return False
-        if self.hardwareSync(id, angle):
+        if self.hardwareSync(id, angle, time):
             self.servoAngles[id] = angle
             return True
         else:
@@ -25,7 +26,7 @@ class ServoDrv():
 
     def setServoAngleInternal(self, id, angle, time):
         # Wait for hardware response
-        if self.hardwareSync(id, angle):
+        if self.hardwareSync(id, angle, time):
             self.servoAngles[id] = angle
             return True
         else:
@@ -40,7 +41,7 @@ class ServoDrv():
         if currentAngle + angle < 0.0 or currentAngle + angle > 180.0:
             return False
         # Wait for hardware response
-        if self.hardwareSync(id, currentAngle + angle):
+        if self.hardwareSync(id, currentAngle + angle, time):
             self.servoAngles[id] += angle
             return True
         else:
@@ -48,7 +49,7 @@ class ServoDrv():
 
     def moveServoAngleInternal(self, id, angle, time):
         # Wait for hardware response
-        if self.hardwareSync(id, self.servoAngles[id] + angle):
+        if self.hardwareSync(id, self.servoAngles[id] + angle, time):
             self.servoAngles[id] += angle
             return True
         else:
