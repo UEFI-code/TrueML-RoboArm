@@ -8,7 +8,7 @@ class ServoDrv():
     
     def hardwareSync(self, id, angle, time):
         # Wait for hardware response
-        self.arm_device.Arm_serial_servo_write(id, angle, time)
+        self.arm_device.Arm_serial_servo_write(id + 1, angle, time)
         return True
 
     def setServoAngle(self, id, angle, time = 1024):
