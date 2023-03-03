@@ -10,8 +10,8 @@ import virtualKinematic
 myServoDrv = virtualKinematic.theVirtualArm()
 
 Motors = 4
-BatchSize = 32
-Epochs = 3000
+BatchSize = 512
+Epochs = 5000
 
 # Initialize cerebellum
 thePredictor = Cerebellum.Predictor(Motors)
