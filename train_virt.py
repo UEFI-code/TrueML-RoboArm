@@ -133,12 +133,12 @@ def testDecider(batchSize, servoObj, decider, trainingDevice = 'cpu'):
     simliar = 1 - nn.L1Loss()(target, y).abs() /  torch.cat((target, y), dim = 0).abs().mean()
     print("The Decider test result: " + str(simliar.mean().item() * 100) + "%")
 
-trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs)
+trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
 torch.save(thePredictor.state_dict(), "thePredictor.pth")
-testPredictor(BatchSize, Motors, myServoDrv, thePredictor)
-# trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2)
+testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
+# trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
 # torch.save(theDecider.state_dict(), "theDecider.pth")
-# teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2)
+# teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
 # torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
 
 # testDecider(BatchSize, myServoDrv, theDecider)
