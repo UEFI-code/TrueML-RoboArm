@@ -10,8 +10,8 @@ import virtualKinematic
 myServoDrv = virtualKinematic.theVirtualArm()
 
 Motors = 4
-BatchSize = 16
-Epochs = 1000
+BatchSize = 32
+Epochs = 3000
 
 # Initialize cerebellum
 thePredictor = Cerebellum.Predictor(Motors)
@@ -22,7 +22,7 @@ optimPredictor = optim.Adam(thePredictor.parameters(), lr=0.001)
 optimDecider = optim.Adam(theDecider.parameters(), lr=0.001)
 
 # Initialize loss function
-lossFunc = nn.MSELoss()
+lossFunc = nn.L1Loss()
 
 # Initialize data
 def getMiniBatch(batchSize, motors, servoObj):
@@ -101,21 +101,25 @@ def teachDecider(batchSize, predictor, decider, optimizerDecider, lossFunc, epoc
 def testPredictor(batchSize, motors, servoObj, predictor):
     x, y = getMiniBatch(batchSize, motors, servoObj)
     output = predictor(x)
-    simliar = nn.CosineSimilarity(dim=1, eps=1e-6)(output, y)
+    simliar = 1 - nn.L1Loss()(output, y).abs() /  torch.cat((output, y), dim = 0).abs().mean()
+    print(output)
+    print(y)
     print("The Predictor test result: " + str(simliar.mean().item() * 100) + "%")
 
 def testDecider(batchSize, servoObj, decider):
     y = torch.rand(batchSize, 3)
     action = decider(y)
     target = getVirtExperimentResult(servoObj, action)
-    simliar = nn.CosineSimilarity(dim=1, eps=1e-6)(target, y)
+    simliar = 1 - nn.L1Loss()(target, y).abs() /  torch.cat((target, y), dim = 0).abs().mean()
     print("The Decider test result: " + str(simliar.mean().item() * 100) + "%")
 
+testPredictor(BatchSize, Motors, myServoDrv, thePredictor)
 trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs)
 torch.save(thePredictor.state_dict(), "thePredictor.pth")
-trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 5)
-torch.save(theDecider.state_dict(), "theDecider.pth")
-teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs)
+testPredictor(BatchSize, Motors, myServoDrv, thePredictor)
+# trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2)
+# torch.save(theDecider.state_dict(), "theDecider.pth")
+# teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2)
 # torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
-# testPredictor(BatchSize, Motors, myServoDrv, thePredictor)
-testDecider(BatchSize, myServoDrv, theDecider)
+
+# testDecider(BatchSize, myServoDrv, theDecider)
