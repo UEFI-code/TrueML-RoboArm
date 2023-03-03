@@ -6,6 +6,7 @@ import torch.optim as optim
 import numpy as np
 import Cerebellum
 import virtualKinematic
+import time
 
 myServoDrv = virtualKinematic.theVirtualArm()
 
@@ -137,11 +138,13 @@ def testDecider(batchSize, servoObj, decider, trainingDevice = 'cpu'):
 
 # trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
 # torch.save(thePredictor.state_dict(), "thePredictor.pth")
-# testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
-trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
-torch.save(theDecider.state_dict(), "theDecider.pth")
+thePredictor.load_state_dict(torch.load("pths/thePredictor_baseline.pth"))
+testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
+#trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
+#torch.save(theDecider.state_dict(), "theDecider.pth")
+theDecider.load_state_dict(torch.load("pths/theDecider_baseline.pth"))
 testDecider(BatchSize, myServoDrv, theDecider, trainingDevice)
-# teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
-# torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
-
-# testDecider(BatchSize, myServoDrv, theDecider)
+time.sleep(5)
+teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
+torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
+testDecider(BatchSize, myServoDrv, theDecider, trainingDevice)
