@@ -24,6 +24,11 @@ optimDecider = optim.Adam(theDecider.parameters(), lr=0.001)
 # Initialize loss function
 lossFunc = nn.L1Loss()
 
+trainingDevice = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print("Training device: " + str(trainingDevice))
+thePredictor.to(trainingDevice)
+theDecider.to(trainingDevice)
+
 # Initialize data
 def getMiniBatch(batchSize, motors, servoObj):
     outputX = []
@@ -53,12 +58,15 @@ def getVirtExperimentResult(myServoObj, batch):
         outputY.append(realPos)
     return torch.tensor(outputY, dtype=torch.float)
     
-def trainPredictor(batchSize, motors, servoObj, predictor, optimizer, lossFunc, epochs):
+def trainPredictor(batchSize, motors, servoObj, predictor, optimizer, lossFunc, epochs, trainingDevice='cpu'):
     for epoch in range(epochs):
         optimizer.zero_grad()
         # get data
         print("Getting data...")
         x, y = getMiniBatch(batchSize, motors, servoObj)
+        if trainingDevice != 'cpu':
+            x = x.to(trainingDevice)
+            y = y.to(trainingDevice)
         # train
         print("Training...thePredictor")
         output = predictor(x)
@@ -68,12 +76,15 @@ def trainPredictor(batchSize, motors, servoObj, predictor, optimizer, lossFunc, 
         # print info
         print("The Predictor train Epoch: " + str(epoch) + " | Loss: " + str(loss.item()))
 
-def trainDecider(batchSize, motors, servoObj, decider, optimizer, lossFunc, epochs):
+def trainDecider(batchSize, motors, servoObj, decider, optimizer, lossFunc, epochs, trainingDevice = 'cpu'):
     for epoch in range(epochs):
         optimizer.zero_grad()
         # get data
         print("Getting data...")
         x, y = getMiniBatch(batchSize, motors, servoObj)
+        if trainingDevice != 'cpu':
+            x = x.to(trainingDevice)
+            y = y.to(trainingDevice)
         # train
         print("Training...theDecider")
         action = decider(y)
@@ -83,12 +94,14 @@ def trainDecider(batchSize, motors, servoObj, decider, optimizer, lossFunc, epoc
         # print info
         print("The Decider train Epoch: " + str(epoch) + " | Loss: " + str(loss.item()))
 
-def teachDecider(batchSize, predictor, decider, optimizerDecider, lossFunc, epochs):
+def teachDecider(batchSize, predictor, decider, optimizerDecider, lossFunc, epochs, trainingDevice = 'cpu'):
     for epoch in range(epochs):
         optimizerDecider.zero_grad()
         # generate dummy targets
         print("Generating dummy targets...")
         targets = torch.rand(batchSize, 3)
+        if trainingDevice != 'cpu':
+            targets = targets.to(trainingDevice)
         kasoX = decider(targets)
         kasoY = predictor(kasoX)
         # We belive predictor more strongly than decider
@@ -98,22 +111,28 @@ def teachDecider(batchSize, predictor, decider, optimizerDecider, lossFunc, epoc
         # print info
         print("The Decider teach Epoch: " + str(epoch) + " | Loss: " + str(loss.item()))
 
-def testPredictor(batchSize, motors, servoObj, predictor):
+def testPredictor(batchSize, motors, servoObj, predictor, trainingDevice = 'cpu'):
     x, y = getMiniBatch(batchSize, motors, servoObj)
+    if trainingDevice != 'cpu':
+        x = x.to(trainingDevice)
+        y = y.to(trainingDevice)
     output = predictor(x)
     simliar = 1 - nn.L1Loss()(output, y).abs() /  torch.cat((output, y), dim = 0).abs().mean()
     print(output)
     print(y)
     print("The Predictor test result: " + str(simliar.mean().item() * 100) + "%")
 
-def testDecider(batchSize, servoObj, decider):
+def testDecider(batchSize, servoObj, decider, trainingDevice = 'cpu'):
     y = torch.rand(batchSize, 3)
+    if trainingDevice != 'cpu':
+        y = y.to(trainingDevice)
     action = decider(y)
     target = getVirtExperimentResult(servoObj, action)
+    if trainingDevice != 'cpu':
+        target = target.to(trainingDevice)
     simliar = 1 - nn.L1Loss()(target, y).abs() /  torch.cat((target, y), dim = 0).abs().mean()
     print("The Decider test result: " + str(simliar.mean().item() * 100) + "%")
 
-testPredictor(BatchSize, Motors, myServoDrv, thePredictor)
 trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs)
 torch.save(thePredictor.state_dict(), "thePredictor.pth")
 testPredictor(BatchSize, Motors, myServoDrv, thePredictor)
