@@ -124,20 +124,23 @@ def testPredictor(batchSize, motors, servoObj, predictor, trainingDevice = 'cpu'
 
 def testDecider(batchSize, servoObj, decider, trainingDevice = 'cpu'):
     y = torch.rand(batchSize, 3)
+    print(y)
     if trainingDevice != 'cpu':
         y = y.to(trainingDevice)
     action = decider(y)
     target = getVirtExperimentResult(servoObj, action)
+    print(target)
     if trainingDevice != 'cpu':
         target = target.to(trainingDevice)
     simliar = 1 - nn.L1Loss()(target, y).abs() /  torch.cat((target, y), dim = 0).abs().mean()
     print("The Decider test result: " + str(simliar.mean().item() * 100) + "%")
 
-trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
-torch.save(thePredictor.state_dict(), "thePredictor.pth")
-testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
-# trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
-# torch.save(theDecider.state_dict(), "theDecider.pth")
+# trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
+# torch.save(thePredictor.state_dict(), "thePredictor.pth")
+# testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
+trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
+torch.save(theDecider.state_dict(), "theDecider.pth")
+testDecider(BatchSize, myServoDrv, theDecider, trainingDevice)
 # teachDecider(BatchSize, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
 # torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
 
