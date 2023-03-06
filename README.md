@@ -6,3 +6,6 @@ First, no human create Inverse Kinematics Equations from start to end.
 
 Second, the Neuro Network can learn itself if you make change to the Mechanical structure.
 
+## Stage A
+
+Use BGD & teacher model to achieve reinformance learning.
