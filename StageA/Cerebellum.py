@@ -46,3 +46,18 @@ class Decider2(nn.Module):
         x = F.relu(self.linear3(x))
         x = self.linear4(x)
         return x
+
+def theRealTricker(goal, Decider, Predictor, device = 'cpu'):
+    angles = Decider(goal)
+    # angles = torch.rand(goal.size(0), 4, device = device)
+
+    angles = torch.nn.Parameter(angles)
+    losser = torch.nn.L1Loss()
+    for i in range(2000):
+        y = Predictor(angles)
+        loss = losser(y, goal)
+        print(loss)
+        loss.backward()
+        angles.data -= 0.05 * angles.grad.data
+        angles.grad.data.zero_()
+    return angles.data
