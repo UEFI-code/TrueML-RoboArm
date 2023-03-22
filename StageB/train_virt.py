@@ -12,7 +12,7 @@ myServoDrv = virtualKinematic.theVirtualArm()
 
 Motors = 4
 BatchSize = 512
-Epochs = 5000
+Epochs = 50000
 SampleNum = 6
 
 # Initialize cerebellum
@@ -235,5 +235,5 @@ testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
 #testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
 #time.sleep(5)
 
-testTricker(100, Motors, myServoDrv, theDecider, thePredictor, trainingDevice)
+#testTricker(100, Motors, myServoDrv, theDecider, thePredictor, trainingDevice)
 
