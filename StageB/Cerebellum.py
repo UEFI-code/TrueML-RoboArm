@@ -5,10 +5,10 @@ import torch.nn.functional as F
 class Predictor(nn.Module):
     def __init__(self, servoNum, SampleNum):
         super(Predictor, self).__init__()
-        self.linear1 = nn.Linear(servoNum + SampleNum * (servoNum + 3), 256)
-        self.linear2 = nn.Linear(256, 256)
-        self.linear3 = nn.Linear(256, 128)
-        self.linear4 = nn.Linear(128, 3)
+        self.linear1 = nn.Linear(servoNum + SampleNum * (servoNum + 3), 1024)
+        self.linear2 = nn.Linear(1024, 1024)
+        self.linear3 = nn.Linear(1024, 1024)
+        self.linear4 = nn.Linear(1024, 3)
     
     def forward(self, x):
         x = F.relu(self.linear1(x))
@@ -32,14 +32,12 @@ class Decider(nn.Module):
         x = self.linear4(x)
         return x
 
-def theRealTricker(goal, Decider, Predictor, device = 'cpu'):
-    angles = Decider(goal)
-    # angles = torch.rand(goal.size(0), 4, device = device)
-
-    angles = torch.nn.Parameter(angles)
+def theRealTricker(goal, theSample, Decider, Predictor, device = 'cpu'):
+    angles = torch.nn.Parameter(torch.rand(goal.shape[0], 4, device = device))
+    angles.requires_grad = True
     losser = torch.nn.L1Loss()
-    for i in range(2000):
-        y = Predictor(angles)
+    for i in range(20000):
+        y = Predictor(torch.cat([angles, theSample], 1))
         loss = losser(y, goal)
         print(loss)
         loss.backward()

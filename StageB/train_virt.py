@@ -193,11 +193,23 @@ def testDecider(batchSize, motors, servoObj, decider, trainingDevice = 'cpu'):
     print("The Avg Decider test result: " + str(100 * score_sum / 128) + "%")
 
 def testTricker(batchSize, motors, servoObj, decider, predictor, testingDevice = 'cpu'):
+    servoObj.armLength = np.random.rand(4) * 0.7 + 0.3
+    print("Arm length: " + str(servoObj.armLength))
     #goal = torch.rand(batchSize, 3)
     _, goal = getMiniBatch(batchSize, motors, servoObj)
+    theSample = None
+    for _ in range(SampleNum):
+        s_x, s_y = getMiniBatch(batchSize, motors, servoObj)
+        if theSample == None:
+            theSample = s_x
+        else:
+            theSample = torch.cat([theSample, s_x], 1)
+        theSample = torch.cat([theSample, s_y], 1)
     if testingDevice != 'cpu':
         goal = goal.to(testingDevice)
-    action = Cerebellum.theRealTricker(goal, decider, predictor, testingDevice)
+        theSample = theSample.to(testingDevice)
+    
+    action = Cerebellum.theRealTricker(goal, theSample, decider, predictor, testingDevice)
     target = getVirtExperimentResult(servoObj, action)
     if testingDevice != 'cpu':
         target = target.to(testingDevice)
@@ -206,9 +218,9 @@ def testTricker(batchSize, motors, servoObj, decider, predictor, testingDevice =
     print(goal)
     print("The Tricker test result: " + str(simliar.item() * 100) + "%")
         
-trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
-torch.save(thePredictor.state_dict(), "thePredictor.pth")
-#thePredictor.load_state_dict(torch.load("pths/thePredictor_baseline.pth"))
+#trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
+#torch.save(thePredictor.state_dict(), "thePredictor.pth")
+thePredictor.load_state_dict(torch.load("pths/thePredictor_baseline.pth"))
 testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
 
 #trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
@@ -223,5 +235,5 @@ testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
 #testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
 #time.sleep(5)
 
-#testTricker(100, Motors, myServoDrv, theDecider, thePredictor, trainingDevice)
+testTricker(100, Motors, myServoDrv, theDecider, thePredictor, trainingDevice)
 
