@@ -114,15 +114,15 @@ def teachDecider(batchSize, Motors, predictor, decider, optimizerDecider, lossFu
     for epoch in range(epochs):
         optimizerDecider.zero_grad()
         # make arm length 0.3 ~ 1.0
-        servoObj.armLength = np.random.rand(4) * 0.7 + 0.3
-        print("Arm length: " + str(servoObj.armLength))
+        myServoDrv.armLength = np.random.rand(4) * 0.7 + 0.3
+        print("Arm length: " + str(myServoDrv.armLength))
         # generate dummy targets
         print("Generating dummy targets...")
         #targets = torch.rand(batchSize, 3)
         _, targets = getMiniBatch(batchSize, Motors, myServoDrv)
         theSample = None
         for _ in range(SampleNum):
-            s_x, s_y = getMiniBatch(batchSize, motors, servoObj)
+            s_x, s_y = getMiniBatch(batchSize, Motors, myServoDrv)
             if theSample == None:
                 theSample = s_x
             else:
@@ -145,7 +145,7 @@ def testPredictor(batchSize, motors, servoObj, predictor, trainingDevice = 'cpu'
     for _ in range(128):
         # make the length at 0.3 ~ 1.0
         servoObj.armLength = np.random.rand(4) * 0.7 + 0.3
-        print("Arm length: " + str(servoObj.armLength))
+        #print("Arm length: " + str(servoObj.armLength))
         x, y = getMiniBatch(batchSize, motors, servoObj)
         for _ in range(SampleNum):
             s_x, s_y = getMiniBatch(batchSize, motors, servoObj)
@@ -158,7 +158,7 @@ def testPredictor(batchSize, motors, servoObj, predictor, trainingDevice = 'cpu'
         simliar = 1 - nn.L1Loss()(output, y).abs() /  torch.cat((output, y), dim = 0).abs().mean()
         print(output)
         print(y)
-        print("The Predictor test result: " + str(simliar.item() * 100) + "%")
+        #print("The Predictor test result: " + str(simliar.item() * 100) + "%")
         score_sum += simliar.item()
     print("The Avg Predictor test result: " + str(100 * score_sum / 128) + "%")
 
@@ -168,7 +168,7 @@ def testDecider(batchSize, motors, servoObj, decider, trainingDevice = 'cpu'):
         #y = torch.rand(batchSize, 3)
         # make arm length 0.3 ~ 1.0
         servoObj.armLength = np.random.rand(4) * 0.7 + 0.3
-        print("Arm length: " + str(servoObj.armLength))
+        #print("Arm length: " + str(servoObj.armLength))
         _, y = getMiniBatch(batchSize, motors, servoObj)
         print(y)
         theSample = None
@@ -188,7 +188,7 @@ def testDecider(batchSize, motors, servoObj, decider, trainingDevice = 'cpu'):
         if trainingDevice != 'cpu':
             target = target.to(trainingDevice)
         simliar = 1 - nn.L1Loss()(target, y).abs() /  torch.cat((target, y), dim = 0).abs().mean()
-        print("The Decider test result: " + str(simliar.item() * 100) + "%")
+        #print("The Decider test result: " + str(simliar.item() * 100) + "%")
         score_sum += simliar.item()
     print("The Avg Decider test result: " + str(100 * score_sum / 128) + "%")
 
@@ -220,19 +220,20 @@ def testTricker(batchSize, motors, servoObj, decider, predictor, testingDevice =
         
 #trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
 #torch.save(thePredictor.state_dict(), "thePredictor.pth")
-#thePredictor.load_state_dict(torch.load("pths/thePredictor_baseline.pth"))
-#testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
+thePredictor.load_state_dict(torch.load("pths/thePredictor_baseline.pth"))
+testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
+time.sleep(5)
 
 #trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs, trainingDevice)
 #torch.save(theDecider.state_dict(), "theDecider.pth")
 theDecider.load_state_dict(torch.load("pths/theDecider_baseline.pth"))
 testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
-#time.sleep(5)
+time.sleep(5)
 
-#teachDecider(BatchSize, Motors, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
+#teachDecider(BatchSize, Motors, thePredictor, theDecider, optimDecider, lossFunc, Epochs, trainingDevice)
 #torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
-#theDecider.load_state_dict(torch.load("pths/theDecider-finetuned.pth"))
-#testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
+theDecider.load_state_dict(torch.load("pths/theDecider-finetuned.pth"))
+testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
 #time.sleep(5)
 
 #testTricker(100, Motors, myServoDrv, theDecider, thePredictor, trainingDevice)
