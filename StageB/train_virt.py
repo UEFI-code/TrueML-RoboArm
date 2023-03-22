@@ -220,13 +220,13 @@ def testTricker(batchSize, motors, servoObj, decider, predictor, testingDevice =
         
 #trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
 #torch.save(thePredictor.state_dict(), "thePredictor.pth")
-thePredictor.load_state_dict(torch.load("pths/thePredictor_baseline.pth"))
-testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
+#thePredictor.load_state_dict(torch.load("pths/thePredictor_baseline.pth"))
+#testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
 
-#trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
+#trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs, trainingDevice)
 #torch.save(theDecider.state_dict(), "theDecider.pth")
-#theDecider.load_state_dict(torch.load("pths/theDecider_baseline.pth"))
-#testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
+theDecider.load_state_dict(torch.load("pths/theDecider_baseline.pth"))
+testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
 #time.sleep(5)
 
 #teachDecider(BatchSize, Motors, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)

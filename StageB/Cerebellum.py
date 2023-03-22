@@ -20,10 +20,10 @@ class Predictor(nn.Module):
 class Decider(nn.Module):
     def __init__(self, servoNum, SampleNum):
         super(Decider, self).__init__()
-        self.linear1 = nn.Linear(3 + SampleNum * (servoNum + 3), 128)
-        self.linear2 = nn.Linear(128, 128)
-        self.linear3 = nn.Linear(128, 128)
-        self.linear4 = nn.Linear(128, servoNum)
+        self.linear1 = nn.Linear(3 + SampleNum * (servoNum + 3), 1024)
+        self.linear2 = nn.Linear(1024, 1024)
+        self.linear3 = nn.Linear(1024, 1024)
+        self.linear4 = nn.Linear(1024, servoNum)
     
     def forward(self, x):
         x = F.relu(self.linear1(x))
