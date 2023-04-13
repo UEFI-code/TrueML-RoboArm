@@ -76,6 +76,6 @@ class theVirtualArm():
             
 if __name__ == "__main__":
     myobj = theVirtualArm()
-    myobj.servoAngles = [30.0, 10.0, 45.0, 30.0]
+    myobj.servoAngles = [00.0, 10.0, 45.0, 30.0]
     print(myobj.calc3DPos())
     myobj.draw()
