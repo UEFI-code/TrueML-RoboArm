@@ -28,7 +28,7 @@ while True:
     PredictedResult = predictor(action)
     print('Predicted Result: ', PredictedResult)
 
-    controlData = action[0].cpu().detach().numpy().tolist()
+    controlData = action[0].cpu().detach().numpy() * 180
     print('Control Data: ', controlData)
-    myServoDrv.setServoGroupRatio(controlData)
+    myServoDrv.setServoGroupAngleInternal(controlData)
     
