@@ -1,49 +1,44 @@
 import cv2
-import numpy as np
-import math
-
-class myCV():
-    def __init__(self, deviceA, deviceB, magicWordA, magicWordB):
-        self.capA = cv2.VideoCapture(deviceA)
-        self.capB = cv2.VideoCapture(deviceB)
-        self.capWidth = int(self.capA.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.capHeight = int(self.capA.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.magicWordA = magicWordA
-        self.magicWordB = magicWordB
-        self.detector = cv2.QRCodeDetector()
+class myScaner():
+    def __init__(self, magicWord = '233'):
+        self.magicWord = magicWord
+        self.QRScaner = cv2.QRCodeDetector()
+        sample = cv2.VideoCapture(0)
+        ret, frame = sample.read()
+        if ret:
+            self.capWidth = int(sample.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.capHeight = int(sample.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            sample.release()
+        else:
+            print('Camera error!')
+            exit(0)
     
+    def takePhoto(self):
+        self.frames = []
+        for i in range(5):
+            cap = cv2.VideoCapture(i)
+            ret, frame = cap.read()
+            if ret:
+                self.frames.append(frame)
+                cap.release()
+            else:
+                print('Camera %d error!' % i)
+                exit(0)
+
     def getQRCode3DPos(self):
-        # Get image from camera A
-        ret, frameA = self.capA.read()
-        if not ret:
-            return False, None
-
-        # Get image from camera B
-        ret, frameB = self.capB.read()
-        if not ret:
-            return False, None
-
-        # Detect QR code in image A
-        ret, dataA, bboxA, straight_qrcodeA = self.detector.detectAndDecodeMulti(frameA)
-        if bboxA is None:
-            return False, None
-        qrID_A = 0
-        for i in range(len(dataA)):
-            if dataA[i] == self.magicWordA:
-                qrID_A = i
-                break
-
-        # Detect QR code in image B
-        ret, dataB, bboxB, straight_qrcodeB = self.detector.detectAndDecodeMulti(frameB)
-        if bboxB is None:
-            return False, None
-        qrID_B = 0
-        for i in range(len(dataB)):
-            if dataB[i] == self.magicWordB:
-                qrID_B = i
-                break
-
-        # Calculate 3D position and return
-        centerPosA = [(bboxA[qrID_A][0][0] + bboxA[qrID_A][2][0]) / 2, (bboxA[qrID_A][0][1] + bboxA[qrID_A][2][1]) / 2]
-        centerPosB = [(bboxB[qrID_B][0][0] + bboxB[qrID_B][2][0]) / 2, (bboxB[qrID_B][0][1] + bboxB[qrID_B][2][1]) / 2]
-        return True, [centerPosA[0] / self.capWidth, centerPosA[1] / self.capHeight, centerPosB[1] / self.capHeight]
+        self.QRPos = []
+        for frame in self.frames:
+            ret, data, bbox, straight_qrcode = self.QRScaner.detectAndDecodeMulti(frame)
+            if bbox is None:
+                self.QRPos.append(None)
+            else:
+                for i in range(len(data)):
+                    if data[i] == self.magicWord:
+                        print('QR code found!')
+                        self.QRPos.append([(bbox[i][0][0] + bbox[i][2][0]) / (2 * self.capWidth), (bbox[i][0][1] + bbox[i][2][1]) / (2 * self.capHeight)])
+                        break
+                    if i == len(data) - 1:
+                        self.QRPos.append(None)
+    
+    def compute3DPos(self):
+        return
