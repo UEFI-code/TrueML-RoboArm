@@ -1,5 +1,6 @@
 import cv2
 from pyzbar.pyzbar import decode
+from Arm_Lib import Arm_Device
 
 class myScaner():
     def __init__(self, magicWord = '233'):
@@ -15,6 +16,7 @@ class myScaner():
         else:
             print('Camera error!')
             exit(0)
+        self.arm_device = Arm_Device()
     
     def takePhoto(self):
         self.frames = []
@@ -44,11 +46,45 @@ class myScaner():
                     if i == len(result) - 1:
                         self.QRPos.append(None)
 
+    def searchScanAngle(self):
+        initAngle = self.arm_device.Arm_serial_servo_read(5)
+        print('initAngle %d' % initAngle)
+        for i in range(initAngle, 180, 5):
+            if i > initAngle:
+                print('Turning to %d' % i)
+                self.arm_device.Arm_serial_servo_write(5, i, 500)
+            self.takePhoto()
+            self.getQRCode3DPos()
+            sum = 0
+            for j in self.QRPos:
+                if j != None:
+                    sum += 1
+            if sum > 2:
+                print('Wonderful!')
+                return
+
+        self.arm_device.Arm_serial_servo_write(5, initAngle, 500)
+
+        for i in range(initAngle, 0, -5):
+            if i < initAngle:
+                print('Turning to %d' % i)
+                self.arm_device.Arm_serial_servo_write(5, i, 500)
+            self.takePhoto()
+            self.getQRCode3DPos()
+            sum = 0
+            for j in self.QRPos:
+                if j != None:
+                    sum += 1
+            if sum > 2:
+                print('Wonderful!')
+                return
+    
     def compute3DPos(self):
         return
 
 if __name__ == '__main__':
-    myScaner = myScaner()
-    myScaner.takePhoto()
-    myScaner.getQRCode3DPos()
-    print(myScaner.QRPos)
+    myScanerObj = myScaner()
+    # myScanerObj.takePhoto()
+    # myScanerObj.getQRCode3DPos()
+    myScanerObj.searchScanAngle()
+    print(myScanerObj.QRPos)
