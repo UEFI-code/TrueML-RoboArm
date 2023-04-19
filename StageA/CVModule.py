@@ -17,6 +17,7 @@ class myScaner():
             print('Camera error!')
             exit(0)
         self.arm_device = Arm_Device()
+        self.arm_device.Arm_serial_set_torque(1)
     
     def takePhoto(self):
         self.frames = []
@@ -48,6 +49,9 @@ class myScaner():
 
     def searchScanAngle(self):
         initAngle = self.arm_device.Arm_serial_servo_read(5)
+        if initAngle == None:
+            initAngle = 90
+            self.arm_device.Arm_serial_servo_write(5, initAngle, 1500)
         print('initAngle %d' % initAngle)
         for i in range(initAngle, 180, 5):
             if i > initAngle:
