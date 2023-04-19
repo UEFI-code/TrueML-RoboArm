@@ -1,6 +1,7 @@
 import ServoDrv
 import Cerebellum
 import torch
+import virtualKinematic
 
 myServoDrv = ServoDrv.ServoDrv(4)
 
@@ -12,9 +13,12 @@ decider.cuda()
 
 # Create a predictor
 
-predictor = Cerebellum.Predictor(4)
-predictor.load_state_dict(torch.load('pths/thePredictor_baseline.pth'))
-predictor.cuda()
+# predictor = Cerebellum.Predictor(4)
+# predictor.load_state_dict(torch.load('pths/thePredictor_baseline.pth'))
+# predictor.cuda()
+
+# create virtual kinematics
+virtualArm = virtualKinematic.theVirtualArm()
 
 while True:
     x,y,z = input('Please input the goal: ').split()
@@ -25,10 +29,12 @@ while True:
     goal.unsqueeze_(0)
     action = decider(goal)
     print('Action: ', action)
-    PredictedResult = predictor(action)
-    print('Predicted Result: ', PredictedResult)
-
+    # PredictedResult = predictor(action)
+    # print('Predicted Result: ', PredictedResult)
     controlData = action[0].cpu().detach().numpy() * 180
     print('Control Data: ', controlData)
+    virtualArm.servoAngles = controlData
+    virtualResult = virtualArm.calc3DPos()
+    print('Virtual Result: ', virtualResult)
     myServoDrv.setServoGroupAngleInternal(controlData)
     
