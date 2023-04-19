@@ -9,10 +9,13 @@ class Arm_Device(object):
     def __init__(self):
         self.addr = 0x15
         self.bus = smbus.SMBus(1)
+        self.calibration = [-9, 2, 93, 89, -1, 13]
+        #self.calibration2 = [1.07, 1.0, 1.0, 1.0, 1.0, 1.0]
 
     # 设置总线舵机角度接口：id: 1-6(0是发6个舵机) angle: 0-180 设置舵机要运动到的角度
     #Set the bus servo angle interface: id: 1-6 (0 is to send 6 servos) angle: 0-180 Set the angle to which the servo should move
     def Arm_serial_servo_write(self, id, angle, time):
+        angle = angle + self.calibration[id - 1]
         if id == 0:  # 此为所有舵机控制 This is the control of all servos
 
             self.Arm_serial_servo_write6(angle, angle, angle, angle, angle, angle, time)
@@ -104,9 +107,23 @@ class Arm_Device(object):
     # Set the bus servo angle interface: array
     def Arm_serial_servo_write6_array(self, joints, time):
         s1, s2, s3, s4, s5, s6 = joints[0], joints[1], joints[2], joints[3], joints[4], joints[5]
-        if s1 > 180 or s2 > 180 or s3 > 180 or s4 > 180 or s5 > 270 or s6 > 180:
-            print("参数传入范围不在0-180之内！The parameter input range is not within 0-180!")
-            return
+        # if s1 > 180 or s2 > 180 or s3 > 180 or s4 > 180 or s5 > 270 or s6 > 180:
+        #     print("参数传入范围不在0-180之内！The parameter input range is not within 0-180!")
+        #     return
+        s1 = s1 + self.calibration[0]
+        s2 = s2 + self.calibration[1]
+        s3 = s3 + self.calibration[2]
+        s4 = s4 + self.calibration[3]
+        s5 = s5 + self.calibration[4]
+        s6 = s6 + self.calibration[5]
+
+        # s1 = s1 * self.calibration2[0]
+        # s2 = s2 * self.calibration2[1]
+        # s3 = s3 * self.calibration2[2]
+        # s4 = s4 * self.calibration2[3]
+        # s5 = s5 * self.calibration2[4]
+        # s6 = s6 * self.calibration2[5]
+        
         try:
             pos = int((3100 - 900) * (s1 - 0) / (180 - 0) + 900)
             value1_H = (pos >> 8) & 0xFF
@@ -152,6 +169,19 @@ class Arm_Device(object):
         if s1 > 180 or s2 > 180 or s3 > 180 or s4 > 180 or s5 > 270 or s6 > 180:
             print("参数传入范围不在0-180之内！The parameter input range is not within 0-180!")
             return
+        s1 = s1 + self.calibration[0]
+        s2 = s2 + self.calibration[1]
+        s3 = s3 + self.calibration[2]
+        s4 = s4 + self.calibration[3]
+        s5 = s5 + self.calibration[4]
+        s6 = s6 + self.calibration[5]
+
+        # s1 = s1 * self.calibration2[0]
+        # s2 = s2 * self.calibration2[1]
+        # s3 = s3 * self.calibration2[2]
+        # s4 = s4 * self.calibration2[3]
+        # s5 = s5 * self.calibration2[4]
+        # s6 = s6 * self.calibration2[5]
         try:
             pos = int((3100 - 900) * (s1 - 0) / (180 - 0) + 900)
             value1_H = (pos >> 8) & 0xFF
@@ -201,25 +231,26 @@ class Arm_Device(object):
             self.bus.write_byte_data(self.addr, id + 0x30, 0x0)
             time.sleep(0.003)
             pos = self.bus.read_word_data(self.addr, id + 0x30)
+            #print(pos)
         except:
             print('Arm_serial_servo_read I2C error')
             return None
-        if pos == 0:
-            return None
+        # if pos == 0:
+        #     return None
         pos = (pos >> 8 & 0xff) | (pos << 8 & 0xff00)
-        # print(pos)
+        #print(pos)
         if id == 5:
             pos = int((270 - 0) * (pos - 380) / (3700 - 380) + 0)
-            if pos > 270 or pos < 0:
-                return None
+            # if pos > 270 or pos < 0:
+            #     return None
         else:
             pos = int((180 - 0) * (pos - 900) / (3100 - 900) + 0)
-            if pos > 180 or pos < 0:
-                return None
+            # if pos > 180 or pos < 0:
+            #     return None
         if id == 2 or id == 3 or id == 4:
             pos = 180 - pos
         # print(pos)
-        return pos
+        return pos - self.calibration[id - 1]
 
     # 读取总线舵机角度，id: 1-250 返回0-180
     # Read the bus servo angle, id: 1-250 return 0-180
