@@ -2,13 +2,14 @@ import cv2
 class myScaner():
     def __init__(self, magicWord = '233'):
         self.magicWord = magicWord
-        self.QRScaner = cv2.QRCodeDetector()
+        self.detector = cv2.QRCodeDetector()
         sample = cv2.VideoCapture(0)
         ret, frame = sample.read()
         if ret:
             self.capWidth = int(sample.get(cv2.CAP_PROP_FRAME_WIDTH))
             self.capHeight = int(sample.get(cv2.CAP_PROP_FRAME_HEIGHT))
             sample.release()
+            print('Camera initialized!  Resolution: %d x %d' % (self.capWidth, self.capHeight))
         else:
             print('Camera error!')
             exit(0)
@@ -28,7 +29,8 @@ class myScaner():
     def getQRCode3DPos(self):
         self.QRPos = []
         for frame in self.frames:
-            ret, data, bbox, straight_qrcode = self.QRScaner.detectAndDecodeMulti(frame)
+            ret, data, bbox, straight_qrcode = self.detector.detectAndDecodeMulti(frame)
+            print(data)
             if bbox is None:
                 self.QRPos.append(None)
             else:
@@ -42,3 +44,9 @@ class myScaner():
     
     def compute3DPos(self):
         return
+
+if __name__ == '__main__':
+    myScaner = myScaner()
+    myScaner.takePhoto()
+    myScaner.getQRCode3DPos()
+    print(myScaner.QRPos)
