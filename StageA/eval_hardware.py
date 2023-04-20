@@ -8,7 +8,7 @@ myServoDrv = ServoDrv.ServoDrv(4)
 # Create a decider
 
 decider = Cerebellum.Decider(4)
-decider.load_state_dict(torch.load('pths/theDecider-finetuned.pth'))
+decider.load_state_dict(torch.load('pths/theDecider_baseline.pth'))
 decider.cuda()
 
 # Create a predictor
