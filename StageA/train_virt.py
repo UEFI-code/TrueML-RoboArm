@@ -156,27 +156,33 @@ def teachDecider2(batchSize, Motors, predictor, decider, optimizerDecider, lossF
 
 def testPredictor(batchSize, motors, servoObj, predictor, trainingDevice = 'cpu'):
     x, y = getMiniBatch(batchSize, motors, servoObj)
+    print(y)
+    open('testPredictor_y.txt', 'w').write(str(y.tolist()))
+    open('testPredictor_x.txt', 'w').write(str(x.tolist()))
     if trainingDevice != 'cpu':
         x = x.to(trainingDevice)
         y = y.to(trainingDevice)
     output = predictor(x)
-    simliar = 1 - nn.L1Loss()(output, y).abs() /  torch.cat((output, y), dim = 0).abs().mean()
     print(output)
-    print(y)
+    open('testPredictor_predict_y.txt', 'w').write(str(output.tolist()))
+    simliar = 1 - nn.L1Loss()(output, y).abs() /  torch.cat((output, y), dim = 0).abs().mean()
     print("The Predictor test result: " + str(simliar.item() * 100) + "%")
 
 def testDecider(batchSize, motors, servoObj, decider, trainingDevice = 'cpu'):
     #y = torch.rand(batchSize, 3)
-    _, y = getMiniBatch(batchSize, motors, servoObj)
-    print(y)
+    _, goals = getMiniBatch(batchSize, motors, servoObj)
+    print(goals)
+    open('testDecider_goals.txt', 'w').write(str(goals.tolist()))
     if trainingDevice != 'cpu':
-        y = y.to(trainingDevice)
-    action = decider(y)
-    target = getVirtExperimentResult(servoObj, action)
-    print(target)
+        goals = goals.to(trainingDevice)
+    actions = decider(goals)
+    open('testDecider_actions.txt', 'w').write(str(actions.tolist()))
+    targets = getVirtExperimentResult(servoObj, actions)
+    print(targets)
+    open('testDecider_targets.txt', 'w').write(str(targets.tolist()))
     if trainingDevice != 'cpu':
-        target = target.to(trainingDevice)
-    simliar = 1 - nn.L1Loss()(target, y).abs() /  torch.cat((target, y), dim = 0).abs().mean()
+        targets = targets.to(trainingDevice)
+    simliar = 1 - nn.L1Loss()(targets, goals).abs() /  torch.cat((targets, goals), dim = 0).abs().mean()
     print("The Decider test result: " + str(simliar.item() * 100) + "%")
 
 def testDecider2(batchSize, motors, servoObj, decider, trainingDevice = 'cpu'):
@@ -212,6 +218,7 @@ def testTricker(batchSize, motors, servoObj, decider, predictor, testingDevice =
 # torch.save(thePredictor.state_dict(), "thePredictor.pth")
 thePredictor.load_state_dict(torch.load("pths/thePredictor_baseline.pth"))
 testPredictor(BatchSize, Motors, myServoDrv, thePredictor, trainingDevice)
+time.sleep(5)
 
 #trainDecider(BatchSize, Motors, myServoDrv, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
 #torch.save(theDecider.state_dict(), "theDecider.pth")
@@ -221,17 +228,18 @@ time.sleep(5)
 
 #teachDecider(BatchSize, Motors, thePredictor, theDecider, optimDecider, lossFunc, Epochs * 2, trainingDevice)
 #torch.save(theDecider.state_dict(), "theDecider-finetuned.pth")
-theDecider.load_state_dict(torch.load("pths/theDecider-finetuned.pth"))
-testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
-time.sleep(5)
+#theDecider.load_state_dict(torch.load("pths/theDecider-finetuned.pth"))
+#testDecider(BatchSize, Motors, myServoDrv, theDecider, trainingDevice)
+#time.sleep(5)
 
-trainDecider2(BatchSize, Motors, myServoDrv, theDecider2, optimDecider2, lossFunc, Epochs * 2, trainingDevice)
-torch.save(theDecider2.state_dict(), "theDecider2.pth")
-# theDecider2.load_state_dict(torch.load("pths/theDecider2_baseline.pth"))
-testDecider2(BatchSize, Motors, myServoDrv, theDecider2, trainingDevice)
+#trainDecider2(BatchSize, Motors, myServoDrv, theDecider2, optimDecider2, lossFunc, Epochs * 2, trainingDevice)
+#torch.save(theDecider2.state_dict(), "theDecider2.pth")
+#theDecider2.load_state_dict(torch.load("pths/theDecider2_baseline.pth"))
+#testDecider2(BatchSize, Motors, myServoDrv, theDecider2, trainingDevice)
 
 # teachDecider2(BatchSize, Motors, thePredictor, theDecider2, optimDecider2, lossFunc, Epochs * 2, trainingDevice)
 # torch.save(theDecider2.state_dict(), "theDecider2-finetuned.pth")
+# theDecider2.load_state_dict(torch.load("pths/theDecider2-finetuned.pth"))
 # testDecider2(BatchSize, Motors, myServoDrv, theDecider2, trainingDevice)
 
 #testTricker(100, Motors, myServoDrv, theDecider, thePredictor, trainingDevice)

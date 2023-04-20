@@ -31,7 +31,7 @@ while True:
     print('Action: ', action)
     # PredictedResult = predictor(action)
     # print('Predicted Result: ', PredictedResult)
-    controlData = action[0].cpu().detach().numpy() * 180
+    controlData = action[0] * 180
     print('Control Data: ', controlData)
     virtualArm.servoAngles = controlData
     virtualResult = virtualArm.calc3DPos()
