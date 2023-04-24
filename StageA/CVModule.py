@@ -1,11 +1,12 @@
 import cv2
 from pyzbar.pyzbar import decode
 from Arm_Lib import Arm_Device
+import time as time_lib
 
 class myScaner():
     def __init__(self, magicWord = '233'):
         self.magicWord = magicWord
-        self.detector = cv2.QRCodeDetector()
+        #self.detector = cv2.QRCodeDetector()
         sample = cv2.VideoCapture(0)
         ret, frame = sample.read()
         if ret:
@@ -17,7 +18,6 @@ class myScaner():
             print('Camera error!')
             exit(0)
         self.arm_device = Arm_Device()
-        self.arm_device.Arm_serial_set_torque(1)
     
     def takePhoto(self):
         self.frames = []
@@ -48,6 +48,8 @@ class myScaner():
                         self.QRPos.append(None)
 
     def searchScanAngle(self):
+        self.arm_device.Arm_serial_set_torque(1)
+        time_lib.sleep(0.3)
         initAngle = self.arm_device.Arm_serial_servo_read(5)
         if initAngle == None:
             initAngle = 90
@@ -59,13 +61,10 @@ class myScaner():
                 self.arm_device.Arm_serial_servo_write(5, i, 500)
             self.takePhoto()
             self.getQRCode3DPos()
-            sum = 0
-            for j in self.QRPos:
-                if j != None:
-                    sum += 1
-            if sum > 2:
+            location = self.compute3DPos()
+            if location != (0, 0, 0):
                 print('Wonderful!')
-                return
+                return location
 
         self.arm_device.Arm_serial_servo_write(5, initAngle, 500)
 
@@ -75,16 +74,41 @@ class myScaner():
                 self.arm_device.Arm_serial_servo_write(5, i, 500)
             self.takePhoto()
             self.getQRCode3DPos()
-            sum = 0
-            for j in self.QRPos:
-                if j != None:
-                    sum += 1
-            if sum > 2:
+            location = self.compute3DPos()
+            if location != (0, 0, 0):
                 print('Wonderful!')
-                return
+                return location
+
+        return (0, 0, 0)
     
     def compute3DPos(self):
-        return
+        x_cam_list = [1, 3, 4]
+        y_cam_list = [0, 2, 4]
+        z_cam_list = [0, 1, 2, 3]
+        x, y, z = None, None, None
+        for i in range(3):
+            if self.QRPos[x_cam_list[i]] != None:
+                if i == 1 or i == 4:
+                    x = (self.QRPos[x_cam_list[i]][0] / self.capWidth) - 0.5
+                else:
+                    x = 0.5 - (self.QRPos[x_cam_list[i]][0] / self.capWidth)
+                break
+        for i in range(3):
+            if self.QRPos[y_cam_list[i]] != None:
+                if i == 2 or i == 4:
+                    y = (self.QRPos[y_cam_list[i]][0] / self.capWidth) - 0.5
+                else:
+                    y = 0.5 - (self.QRPos[y_cam_list[i]][0] / self.capWidth)
+                break
+        for i in range(4):
+            if self.QRPos[z_cam_list[i]] != None:
+                z = 1.0 - (self.QRPos[z_cam_list[i]][1] / self.capHeight)
+                break
+        
+        if x == None or y == None or z == None:
+            return (0, 0, 0)
+        
+        return(x, y, z)
 
 if __name__ == '__main__':
     myScanerObj = myScaner()

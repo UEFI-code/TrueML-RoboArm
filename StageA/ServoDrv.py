@@ -5,15 +5,21 @@ class ServoDrv():
         self.servoNum = servoNum
         self.servoAngles = [0.0] * servoNum
         self.arm_device = Arm_Device()
-        self.arm_device.Arm_serial_set_torque(1)
         # Initialize hardware
         for i in range(1, 5):
             self.servoAngles[i - 1] = self.arm_device.Arm_serial_servo_read(i)
     
     def hardwareSync(self, id, angle, time):
         # Wait for hardware response
+        self.arm_device.Arm_serial_set_torque(1)
+        time_lib.sleep(0.3)
         self.arm_device.Arm_serial_servo_write(id + 1, angle, time)
-        time_lib.sleep(time / 1000.0)
+        time_lib.sleep(2 * time / 1000.0)
+        nowAngle = self.arm_device.Arm_serial_servo_read(id + 1)
+        if abs(nowAngle - angle) > 5.0:
+            print('Shit! Motor stuck!')
+            self.arm_device.Arm_serial_set_torque(0)
+            return False
         return True
 
     def setServoAngle(self, id, angle, time = 1024):
