@@ -1,6 +1,7 @@
 import ServoDrv
 import Cerebellum
 import torch
+import torch.nn as nn
 import CVModule
 import virtualKinematic
 import numpy as np
