@@ -86,23 +86,25 @@ class myScaner():
         y_cam_list = [0, 2, 4]
         z_cam_list = [0, 1, 2, 3]
         x, y, z = None, None, None
-        for i in range(3):
-            if self.QRPos[x_cam_list[i]] != None:
+        for i in x_cam_list:
+            if self.QRPos[i] != None:
                 if i == 1 or i == 4:
-                    x = (self.QRPos[x_cam_list[i]][0] / self.capWidth) - 0.5
+                    x = self.QRPos[i][0] - 0.5
                 else:
-                    x = 0.5 - (self.QRPos[x_cam_list[i]][0] / self.capWidth)
+                    x = 0.5 - self.QRPos[i][0]
                 break
-        for i in range(3):
-            if self.QRPos[y_cam_list[i]] != None:
-                if i == 2 or i == 4:
-                    y = (self.QRPos[y_cam_list[i]][0] / self.capWidth) - 0.5
+        for i in y_cam_list:
+            if self.QRPos[i] != None:
+                if i == 2:
+                    y = self.QRPos[i][0] - 0.5
+                elif i == 4:
+                    y = 0.5 - self.QRPos[i][1]
                 else:
-                    y = 0.5 - (self.QRPos[y_cam_list[i]][0] / self.capWidth)
+                    y = 0.5 - self.QRPos[i][0]
                 break
-        for i in range(4):
-            if self.QRPos[z_cam_list[i]] != None:
-                z = 1.0 - (self.QRPos[z_cam_list[i]][1] / self.capHeight)
+        for i in z_cam_list:
+            if self.QRPos[i] != None:
+                z = 1.0 - self.QRPos[i][1]
                 break
         
         if x == None or y == None or z == None:
@@ -114,5 +116,5 @@ if __name__ == '__main__':
     myScanerObj = myScaner()
     # myScanerObj.takePhoto()
     # myScanerObj.getQRCode3DPos()
-    myScanerObj.searchScanAngle()
-    print(myScanerObj.QRPos)
+    print(myScanerObj.searchScanAngle())
+    #print(myScanerObj.QRPos)
