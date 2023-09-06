@@ -11,7 +11,7 @@ class Predictor(nn.Module):
         self.linear4 = nn.Linear(1024, 3)
     
     def forward(self, x):
-        x = F.relu(self.linear1(x))
+        x = self.linear1(x)
         x = F.relu(self.linear2(x))
         x = F.relu(self.linear3(x))
         x = self.linear4(x)
@@ -26,7 +26,7 @@ class Decider(nn.Module):
         self.linear4 = nn.Linear(1024, servoNum)
     
     def forward(self, x):
-        x = F.relu(self.linear1(x))
+        x = self.linear1(x)
         x = F.relu(self.linear2(x))
         x = F.relu(self.linear3(x))
         x = self.linear4(x)
