@@ -29,6 +29,7 @@ def getSamples(cvObj, servoObj, num):
     return torch.tensor(Samples).cuda()
 
 mySamples = getSamples(myCV, myServoDrv, 6).unsqueeze_(0)
+
 while True:
     x,y,z = input('Please input the goal: ').split()
     x = float(x) / 4
@@ -36,7 +37,7 @@ while True:
     z = float(z) / 4
     goal = torch.tensor([x,y,z]).cuda()
     goal.unsqueeze_(0)
-    action = decider(torch.cat([goal, mySamples], 1))
+    action = decider(torch.cat((goal, mySamples), 1))
     print('Action: ', action)
     # PredictedResult = predictor(action)
     # print('Predicted Result: ', PredictedResult)
