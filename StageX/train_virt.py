@@ -21,8 +21,8 @@ thePredictor = Cerebellum.Predictor(Motors, SampleNum)
 theDecider = Cerebellum.Decider(Motors, SampleNum)
 
 # Initialize optimizer
-optimPredictor = optim.Adam(thePredictor.parameters(), lr=0.0001)
-optimDecider = optim.Adam(theDecider.parameters(), lr=0.0001)
+optimPredictor = optim.Adam(thePredictor.parameters(), lr=0.00001)
+optimDecider = optim.Adam(theDecider.parameters(), lr=0.00001)
 
 # Initialize loss function
 lossFunc = nn.L1Loss()
@@ -84,8 +84,7 @@ def trainPredictor(batchSize, motors, servoObj, predictor, optimizer, lossFunc, 
         x, y = getMiniBatch(batchSize, motors, servoObj)
         for _ in range(SampleNum):
             s_x, s_y = getMiniBatch(batchSize, motors, servoObj)
-            x = torch.cat((x, s_x), 1)
-            x = torch.cat((x, s_y), 1)
+            x = torch.cat((x, s_x, s_y), 1)
         if trainingDevice != 'cpu':
             x = x.to(trainingDevice)
             y = y.to(trainingDevice)
@@ -107,8 +106,7 @@ def trainDecider(batchSize, motors, servoObj, decider, optimizer, lossFunc, epoc
         x, y = getMiniBatch(batchSize, motors, servoObj)
         for _ in range(SampleNum):
             s_x, s_y = getMiniBatch(batchSize, motors, servoObj)
-            y = torch.cat((y, s_x), 1)
-            y = torch.cat((y, s_y), 1)
+            y = torch.cat((y, s_x, s_y), 1)
         if trainingDevice != 'cpu':
             x = x.to(trainingDevice)
             y = y.to(trainingDevice)
@@ -133,10 +131,9 @@ def teachDecider(batchSize, Motors, predictor, decider, optimizerDecider, lossFu
         for _ in range(SampleNum):
             s_x, s_y = getMiniBatch(batchSize, Motors, myServoDrv)
             if theSample == None:
-                theSample = s_x
+                theSample = torch.cat([s_x, s_y], 1)
             else:
-                theSample = torch.cat([theSample, s_x], 1)
-            theSample = torch.cat([theSample, s_y], 1)
+                theSample = torch.cat([theSample, s_x, s_y], 1)
         if trainingDevice != 'cpu':
             targets = targets.to(trainingDevice)
             theSample = theSample.to(trainingDevice)
