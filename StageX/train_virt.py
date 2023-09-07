@@ -21,8 +21,8 @@ thePredictor = Cerebellum.Predictor(Motors, SampleNum)
 theDecider = Cerebellum.Decider(Motors, SampleNum)
 
 # Initialize optimizer
-optimPredictor = optim.Adam(thePredictor.parameters(), lr=0.001)
-optimDecider = optim.Adam(theDecider.parameters(), lr=0.001)
+optimPredictor = optim.Adam(thePredictor.parameters(), lr=0.0001)
+optimDecider = optim.Adam(theDecider.parameters(), lr=0.0001)
 
 # Initialize loss function
 lossFunc = nn.L1Loss()
@@ -148,6 +148,14 @@ def teachDecider(batchSize, Motors, predictor, decider, optimizerDecider, lossFu
         optimizerDecider.step()
         # print info
         print("The Decider teach Epoch: " + str(epoch) + " | Loss: " + str(loss.item()))
+
+try:
+    thePredictor.load_state_dict(torch.load("thePredictor.pth"))
+    print("thePredictor.pth loaded")
+    theDecider.load_state_dict(torch.load("theDecider.pth"))
+    print("theDecider.pth loaded")
+except Exception as e:
+    print(e)
 
 trainPredictor(BatchSize, Motors, myServoDrv, thePredictor, optimPredictor, lossFunc, Epochs, trainingDevice)
 torch.save(thePredictor.state_dict(), "thePredictor.pth")
