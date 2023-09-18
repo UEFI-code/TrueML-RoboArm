@@ -36,6 +36,7 @@ def initVirtualArmHyperParam(servoObj):
     # make arm length 0.3 ~ 1.0
     servoObj.armLength = np.random.rand(4) * 0.7 + 0.3
     print("Arm length: " + str(servoObj.armLength))
+    return
     src_points = np.float32([[0, 0], [1, 0], [0, 1], [1, 1]])
     dst_offset1 = np.float32(np.random.rand(4, 2) * 0.6 - 0.3)
     dst_points1 = src_points + dst_offset1

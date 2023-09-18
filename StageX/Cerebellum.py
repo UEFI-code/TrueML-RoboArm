@@ -5,13 +5,13 @@ import torch.nn.functional as F
 class Predictor(nn.Module):
     def __init__(self, servoNum, SampleNum):
         super(Predictor, self).__init__()
-        self.linear1 = nn.Linear(servoNum + SampleNum * (servoNum + 3), 2048)
-        self.linear2 = nn.Linear(2048, 2048)
-        self.linear3 = nn.Linear(2048, 2048)
-        self.linear4 = nn.Linear(2048, 3)
+        self.linear1 = nn.Linear(servoNum + SampleNum * (servoNum + 3), 1024)
+        self.linear2 = nn.Linear(1024, 1024)
+        self.linear3 = nn.Linear(1024, 1024)
+        self.linear4 = nn.Linear(1024, 3)
     
     def forward(self, x):
-        x = self.linear1(x)
+        x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))
         x = F.relu(self.linear3(x))
         x = self.linear4(x)
@@ -20,13 +20,13 @@ class Predictor(nn.Module):
 class Decider(nn.Module):
     def __init__(self, servoNum, SampleNum):
         super(Decider, self).__init__()
-        self.linear1 = nn.Linear(3 + SampleNum * (servoNum + 3), 2048)
-        self.linear2 = nn.Linear(2048, 2048)
-        self.linear3 = nn.Linear(2048, 2048)
-        self.linear4 = nn.Linear(2048, servoNum)
+        self.linear1 = nn.Linear(3 + SampleNum * (servoNum + 3), 1024)
+        self.linear2 = nn.Linear(1024, 1024)
+        self.linear3 = nn.Linear(1024, 1024)
+        self.linear4 = nn.Linear(1024, servoNum)
     
     def forward(self, x):
-        x = self.linear1(x)
+        x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))
         x = F.relu(self.linear3(x))
         x = self.linear4(x)
