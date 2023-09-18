@@ -8,7 +8,7 @@ myServoDrv = ServoDrv.ServoDrv(4)
 myCV = CVModule.myScaner()
 
 # Create a decider
-decider = Cerebellum.Decider(4)
+decider = Cerebellum.Decider(4, 6)
 decider.load_state_dict(torch.load('pths/theDecider-finetuned.pth'))
 decider.cuda()
 
@@ -17,7 +17,7 @@ def getSamples(cvObj, servoObj, num):
     for i in range(num):
         pos = (0, 0, 0)
         while pos == (0, 0, 0):
-            while(not myServoDrv.moveServoAngleInternal(random.randint(0, 3), random.randint(0, 90) - 45, 1024)):
+            while(not myServoDrv.moveServoAngle(random.randint(0, 3), random.randint(0, 90) - 45, 1024)):
                 pass
             print('Current Angle: ', servoObj.servoAngles)
             pos = cvObj.searchScanAngle()
@@ -29,6 +29,7 @@ def getSamples(cvObj, servoObj, num):
     return torch.tensor(Samples).cuda()
 
 mySamples = getSamples(myCV, myServoDrv, 6).unsqueeze_(0)
+print('Samples: ', mySamples)
 
 while True:
     x,y,z = input('Please input the goal: ').split()

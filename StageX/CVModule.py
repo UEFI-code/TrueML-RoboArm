@@ -55,7 +55,7 @@ class myScaner():
             initAngle = 90
             self.arm_device.Arm_serial_servo_write(5, initAngle, 1500)
         print('initAngle %d' % initAngle)
-        for i in range(initAngle, 180, 10):
+        for i in range(initAngle, 180, 30):
             if i > initAngle:
                 print('Turning to %d' % i)
                 self.arm_device.Arm_serial_servo_write(5, i, 500)
@@ -68,7 +68,7 @@ class myScaner():
 
         self.arm_device.Arm_serial_servo_write(5, initAngle, 500)
 
-        for i in range(initAngle, 0, -10):
+        for i in range(initAngle, 0, -30):
             if i < initAngle:
                 print('Turning to %d' % i)
                 self.arm_device.Arm_serial_servo_write(5, i, 500)
