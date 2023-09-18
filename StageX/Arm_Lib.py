@@ -413,6 +413,7 @@ class Arm_Device(object):
         try:
             if delay != 0:
                 self.bus.write_byte_data(self.addr, 0x06, delay&0xff)
+                time.sleep(delay * 0.1)
         except:
             print('Arm_Buzzer_On I2C error')
 

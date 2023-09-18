@@ -6,6 +6,9 @@ class ServoDrv():
         self.servoAngles = [0.0] * servoNum
         self.arm_device = Arm_Device()
         # Initialize hardware
+        self.getHardwareAngles()
+    
+    def getHardwareAngles(self):
         for i in range(1, 5):
             self.servoAngles[i - 1] = self.arm_device.Arm_serial_servo_read(i)
     
