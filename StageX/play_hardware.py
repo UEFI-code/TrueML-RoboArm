@@ -3,6 +3,7 @@ import Cerebellum
 import CVModule
 import torch
 import random
+import os
 
 myServoDrv = ServoDrv.ServoDrv(4)
 myCV = CVModule.myScaner()
@@ -28,7 +29,12 @@ def getSamples(cvObj, servoObj, num):
             Samples.append(m)
     return torch.tensor(Samples).cuda()
 
-mySamples = getSamples(myCV, myServoDrv, 6).unsqueeze_(0)
+if os.path.exists('HardwareSamples.pkl'):
+    mySamples = torch.load('HardwareSamples.pkl')
+    print('Load Samples from file.')
+else:
+    mySamples = getSamples(myCV, myServoDrv, 6).unsqueeze_(0)
+    torch.save(mySamples, 'HardwareSamples.pkl')
 print('Samples: ', mySamples)
 
 while True:
