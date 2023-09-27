@@ -40,7 +40,7 @@ def getSamples(cvObj, servoObj, num):
     return torch.tensor(Samples).cuda()
 
 if os.path.exists('HardwareSamples.pkl'):
-    mySamples = torch.load('HardwareSamples.pkl')
+    mySamples = torch.load('HardwareSamples.pkl').cuda()
     print('Load Samples from file.')
 else:
     autoFetch.fetch(myServoDrv.arm_device)
